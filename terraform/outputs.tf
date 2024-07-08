@@ -1,3 +1,3 @@
 output "namespace" {
-    value = kubernetes_namespace.flask_app.metadata[0].name
+    value = kubernetes_namespace.hello-cicd.metadata[0].name
 }

@@ -10,8 +10,8 @@ provider "kubernetes" {
     config_path = "~/.kube/config"
 }
 
-resource "kubernetes_namespace" "flask_app" {
+resource "kubernetes_namespace" "hello-cicd" {
     metadata {
-        name = "flask-namespace"
+        name = "hello-cicd-namespace"
     }
 }
