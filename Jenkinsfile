@@ -23,7 +23,7 @@ pipeline {
                 script {
                     // Ensure kubectl is configured and has access to your Kubernetes cluster.
                     // Update the deployment command accordingly if needed.
-                    bat "kubectl set image deployment/hello-cicd hello-cicd=${DOCKER_IMAGE}:${BUILD_NUMBER} --record"
+                    bat "kubectl set image deployment/hello-cicd flask-app=${DOCKER_IMAGE}:${BUILD_NUMBER} -n hello-cicd-namespace"
                 }
             }
         }
