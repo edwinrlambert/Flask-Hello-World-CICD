@@ -11,8 +11,6 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Using 'bat' instead of 'sh' for Windows batch command execution
-                    // Ensure Docker CLI and kubectl are available in your system PATH.
                     bat "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
                     bat "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
                 }
@@ -21,9 +19,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Ensure kubectl is configured and has access to your Kubernetes cluster.
-                    // Update the deployment command accordingly if needed.
-                    bat "kubectl set image deployment/hello-cicd flask-app=${DOCKER_IMAGE}:${BUILD_NUMBER} -n hello-cicd-namespace"
+                    // Now using 'hello-cicd' as the container name as per your deployment details
+                    bat "kubectl set image deployment/hello-cicd hello-cicd=${DOCKER_IMAGE}:${BUILD_NUMBER} -n hello-cicd-namespace"
                 }
             }
         }
