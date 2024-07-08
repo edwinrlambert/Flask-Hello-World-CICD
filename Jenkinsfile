@@ -17,7 +17,7 @@ pipeline {
                 script {
                     // Check if Docker is installed
                     try {
-                        sh "docker --version"
+                        sh '"C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe" version'
                         echo "docker is installed."
                     } catch (Exception e) {
                         echo "Docker is not installed."
