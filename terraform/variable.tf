@@ -1,0 +1,1 @@
+# To declare variables, if necessary.
