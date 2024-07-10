@@ -178,7 +178,7 @@ For creating a flask application, we create an `app` folder and inside we create
 - The `templates` folder will contain static data as well as placeholder for dynamic data, usually HTML files that uses Jinja template.
 
 ```
-# Flask Folder Structure
+# Flask Application Folder Structure
 Hello CICD
 ├─ app 
 │   │   
@@ -321,11 +321,66 @@ py run.py
 
 This will run the Flask application on your web browser at `localhost:5000`.
 
-## **V. Setting up Docker**
+## **V. Prepare Flask Application for Testing**
+
+Ensure that your Flask application has a dedicated test directory. We'll use Python’s built-in unittest framework.
+
+```
+# Flask Test Folder Structure
+Hello CICD
+└─ tests
+    ├── __init__.py                          
+    └── test_views.py
+```
+
+```py
+import unittest
+from flask import url_for
+from app import create_app
+
+class FlaskTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        # Set up test client before each test.
+        self.app = create_app()
+        self.app.testing = True
+        self.client = self.app.test_client()
+        
+    def test_home_status_code(self):
+        # Test that the homepage is accessible.
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        
+    def test_home_data(self):
+        # Test the data returned by the home page.
+        response = self.client.get('/')
+        self.assertIn(b'Hello CI/CD!', response.data)
+        
+        
+if __name__ =="__main__":
+    unittest.main()
+```
+
+**Explanations**:
+
+- Import the necessary libraries.
+    - `unittest` is the Python's built-in module for creating and running tests.
+    - `create_app` creates and configures an instance of the Flask application.
+- We first create a test class that inherits from `unittest.Testcase`, providing a framework for writing tests.
+    - The `setUp` is a special method that is run before each test method. It is used to set up the state that is shared among the test methods.
+        - `self.app = create_app()`: Creates an instance of the Flask application using the create_app function.
+        - `self.app.testing = True`: Puts the Flask app in testing mode, which provides better error messages and ensures that exceptions propagate rather than being handled by the Flask error handlers.
+        - `self.client = self.app.test_client()`: Creates a test client that can be used to simulate HTTP requests to the Flask application. This client is used to interact with the application during testing.
+    - The `test_home_status_code` is a test method to verify that the home page is accessible.
+        - `self.assertEqual(response.status_code, 200)`: Asserts that the HTTP status code of the response is 200, indicating success.
+    - The `test_home_data` is a test method to verify the content of the home page.
+        - `self.assertIn(b'Hello CI/CD!', response.data)`: Asserts that the response data contains the byte string b'Hello CI/CD!'. This ensures that the expected content is present on the home page.
+
+## **VI. Setting up Docker**
 
 Now we will use Docker to build, test, and deploy applications quickly.
 
-### **V. I. Setting up Docker Desktop**
+### **VI. I. Setting up Docker Desktop**
 
 **Note**: I'm using WIndows (Yeah Yeah, I know. I hear you!)
 
@@ -348,11 +403,12 @@ docker run hello-world
 
 This command will download a test image and run it in a container. If successful, you'll see a `"Hello from Docker!"` message. 
 
-### **V. II. Creating a Dockerfile**
+### **VI. II. Creating a Dockerfile**
 
 A `Dockerfile` is a text file that contains collections of instructions and commands that will be automatically executed in sequence in the docker environment for building a new docker image.
 
 ```
+# Dockerfile folder structure
 Hello CICD
 └─ Dockerfile
 ```
@@ -388,7 +444,7 @@ CMD [ "python", "run.py" ]
 - `ENV NAME World` sets an environment variable `NAME` with the value `World` inside the container.
 - `CMD [ "python", "run.py" ]` specifies the command to run when the container starts.
 
-### **V. III. Build and Run the Docker Container**
+### **VI. III. Build and Run the Docker Container**
 
 Now, we build and run the docker container and verify that the applications runs inside the container by accessing it via `localhost:5000`.
 
@@ -414,3 +470,268 @@ docker run -p 5000:5000 hello-cicd
 - `-p 5000:5000` is used to publish a container's port to the host. The format is `host_port:container_post`.
 
 Verify that the application runs by opening the web browser and navigate to `https://localhost:5000`.
+
+## **VII. Setting Up Terraform**
+
+### **VII. I. Install and Verify Terraform**
+
+1. Download the appropriate [Terraform](https://developer.hashicorp.com/terraform/install) for your OS from the website.
+2. Extract the binary to a directory included in your system's PATH, such as `C:\Windows\System32` or add the binary location to the environment variables `PATH` variable or manually add it.
+3. Open terminal/command prompt and enter `terraform -v` to ensure it's correctly installed and variables are set.
+
+### **VII. II. Create Terraform Configuration Files**
+
+1. Navigate to your project directory and create a subdirectory named terraform.
+2. Inside this directory, create the following files:
+    - `main.tf`: Main configuration file where you will define the provider and resources.
+    - `variables.tf`: File to declare variables.
+    - `outputs.tf`: File to declare outputs.
+
+```
+# Terraform Folder Structure
+Hello CICD
+└─ terraform
+    ├── main.tf                     
+    ├── outputs.tf
+    └── variable.tf
+```
+
+**main.tf** file
+
+```hcl
+terraform {
+    required_providers {
+        kubernetes = {
+            source = "hashicorp/kubernetes"
+        }
+    }
+}
+
+provider "kubernetes" {
+    config_path = "~/.kube/config"
+}
+
+resource "kubernetes_namespace" "hello-cicd" {
+    metadata {
+        name = "hello-cicd-namespace"
+    }
+}
+```
+**Explanations**:
+
+- `terraform` is the block is used to specify settings related to Terraform itself, including provider requirements.
+    - `required_providers`: This block specifies the providers that are required for this configuration.
+        - `kubernetes` is the name of the provider.
+            - `source = "hashicorp/kubernetes"`: This specifies the source of the provider, indicating that the Kubernetes provider plugin should be downloaded from the HashiCorp repository.
+- `provider "kubernetes"` block configures the Kubernetes provider.
+    - `config_path = "~/.kube/config"`: This specifies the path to the Kubernetes configuration file (kubeconfig). 
+- `resource "kubernetes_namespace" "hello-cicd"`: This block defines a resource of type kubernetes_namespace with the identifier hello-cicd.
+    - `metadata` block specifies metadata for the Kubernetes namespace.
+        - `name = "hello-cicd-namespace"`: This sets the name of the namespace to hello-cicd-namespace.
+
+**outputs.tf** file
+
+```
+output "namespace" {
+    value = kubernetes_namespace.hello-cicd.metadata[0].name
+}
+```
+
+**Explanations**:
+
+- `output "namespace"`: This declares an output block named namespace. Outputs are used to make information about your infrastructure available after the configuration has been applied. 
+    - `value`: This specifies the value that the output will contain. In this case, the value is being set to kubernetes_namespace.hello-cicd.metadata[0].name.
+
+### **VII. III. Initialize and apply Terraform Configurations**
+
+1. Navigate to the `Terraform` folder inside the main directory.
+2. Run `terraform init` to initialize the directory with necessary Terraform configurations.
+3. Execute terraform plan to see the execution plan.
+4. Run terraform apply to apply the configurations and create the resources in your cluster.
+
+## **VIII. Setting up Container Orchestration with Kubernetes**
+
+Kubernetes can be used to automatically provisions, deploys, scales, and manages containerized applications without worrying about the underlying infrastructure.
+
+### **VIII. I. Enabling Kubernetes in Docker Desktop**
+
+1. Open Docker Desktop.
+2. Go to Settings > Kubernetes.
+3. Check "Enable Kubernetes" and apply changes.
+
+### **VIII. II. Creating Kubernetes Configuration files**
+
+1. Navigate to your project directory and create a subdirectory named k8s.
+2. Inside this directory, create files such as deployment.yaml, service.yaml, and ingress.yaml.
+
+```
+# Terraform Folder Structure
+Hello CICD
+└─ k8s
+    ├── deployment.yaml
+    ├── ingress.yaml
+    └── service.yaml
+```
+
+**deployment.yaml** file
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-cicd
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-cicd
+  template:
+    metadata:
+      labels:
+        app: hello-cicd
+    spec:
+      containers:
+        - name: hello-cicd
+          image: {username}/hello-cicd:latest
+          ports:
+            - containerPort: 5000
+```
+
+**Explanations**:
+- `apiVersion: apps/v1` specifies the API version for the Kubernetes Deployment object. `apps/v1` is the stable API version for managing deployments.
+- `kind: Deployment` indicates that the resource being defined is a Deployment. A Deployment ensures that a specified number of pod replicas are running at any given time.
+- `metadata` provides metadata about the deployment.
+- `spec` describes the desired state of the Deployment.
+    - `replicas: 3` specifies that three replicas (pods) of the application should be running.
+    - `selector` defines how to identify the pods managed by this Deployment.
+        - `matchLabels` specifies that pods with the label app: hello-cicd are selected.
+    - `template` describes the pod that will be created by the Deployment.
+        - `containers` specifies the containers that will run in the pods.
+            - `name: hello-cicd` is the name of the container.
+            - `image: {username}/hello-cicd:latest` is the Docker image to use for the container. 
+            - `ports` specifies the ports that the container will expose.
+                - `containerPort: 5000` mentions that the container will listen on port 5000.
+
+**service.yaml** file
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-cicd-service
+  namespace: hello-cicd-namespace
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: hello-cicd
+
+```
+
+**Explanations**:
+
+- `kind: Service` indicates that the resource being defined is a Service. A Service is an abstraction that defines a logical set of pods and a policy to access them.
+- `spec` describes the desired state of the Service.
+    - `type: LoadBalancer` specifies that the Service should be of type LoadBalancer, which exposes the Service externally using a cloud provider’s load balancer.
+    - `ports` defines the ports that the Service will expose.
+        - `port: 5000` si the port on which the Service will be exposed.
+        - `targetPort: 5000` is the port on the container that the traffic will be forwarded to.
+        - `protocol: TCP` is the protocol used by the Service. In this case, it’s TCP.
+    - `selector` defines how the Service will identify the pods it routes traffic to.
+
+### **VIII. III. Deploy and Access the Application**
+
+1. On the terminal, use `kubectl apply -f k8s/` to apply your Kubernetes configurations.
+2. Since you’re using Docker Desktop, your service type can be LoadBalancer.
+3. Run `kubectl get services -n hello-cicd-namespace` to find the IP and port to access your Flask application.
+
+## **IX. Setting Up Continuous Integration and Continuous Deployment (CI/CD) with Jenkins**
+
+First, you need to have Jenkins installed on your server or local machine.
+
+### **IX. I. Setting up Jenkins**
+
+1. Download [Jenkins](https://www.jenkins.io/download/) for your platform.
+2. Install Jenkins based on the instructions specific to the OS.
+3. After installation, navigate to `https://localhost:8080`.
+4. Follow the on-screen installation to complete the setup, which includes unlocking Jenkins using the initial admin password found in the installation logs or file.   
+
+### **IX. II. Configure Jenkins for the Project**
+
+After installation, we need to set up the project in Jenkins.
+
+1. Create a New Job:
+    - On the Jenkin's dashboard, click New Item.
+    - Enter the name for the job. For Example, `hello-cicd`.
+    - Select `Pipeline` and click OK.
+2. Configure Source Code Management:
+    - In the job configurations, scroll to the "`pipeline`" section.
+    - You can choose either "`Pipeline script`" to write the Jenkinsfile script directly in the UI, or "`Pipeline script from SCM`" to load it from your source control. `Git` in my case.
+
+### **IX. III. Creating a Jenkinsfile**
+
+A `Jenkinsfile` defines the steps that Jenkins should follow as part of the CI pipeline. 
+
+```groovy
+pipeline {
+    agent any
+    environment {
+        // Update this with your Docker Hub username and the repository name
+        DOCKER_IMAGE = '{username}/hello-cicd'
+
+        // Specify the path to your kubeconfig file correctly for a Windows machine.
+        KUBECONFIG = 'C:\\Users\\user\\.kube\\config'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    bat "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
+                    bat "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    // Now using 'hello-cicd' as the container name as per your deployment details
+                    bat "kubectl set image deployment/hello-cicd hello-cicd=${DOCKER_IMAGE}:${BUILD_NUMBER} -n hello-cicd-namespace"
+                }
+            }
+        }
+    }
+}
+```
+
+**Explanation**:
+
+- `pipeline` declares the beginning of the Jenkins pipeline.
+- `agent any` specifies that the pipeline can run on any available Jenkins agent.
+- `environment` defines the environment variables that are accessible throughout the pipeline.
+    - `DOCKER_IMAGE` is the docker image name.
+    - `KUBECONFIG` is the path to Kubernetes configuration file (`kubeconfig`)
+- `stages` consists of two stages: `Build` and `Deploy`.
+    - `stage("Build")` defines a stage named "Build".
+        - `bat "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."` uses the `bat` command to execute a batch script on the Windows machine. It builds a Docker image with a tag that includes the Docker image name and the Jenkins build number.
+        - `bat "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"` pushes the docker image to the Docker Hub using the tag created in the previous step.
+    - `stage("Deploy")` defines a stage named "Deploy".
+        - `bat "kubectl set image deployment/hello-cicd hello-cicd=${DOCKER_IMAGE}:${BUILD_NUMBER} -n hello-cicd-namespace"` uses the `bat` command to execute a batch script to update the Kubernetes deployment named `hello-cicd` in the `hello-cicd-namespace` to use the new Docker image tagged with the current build number.
+
+### **IX. IV. Build the Pipeline**
+
+Configure the Jenkins pipeline to pull the code from the GitHub repository, build the Docker image, run tests, and deploy the application.
+
+1. On the Jenkins dashboard, Click on the job you just created.
+2. Click `Build Now` to start the pipeline.
+3. After clicking Build Now, you'll see a new build appear under the Build History.
+4. Click on the build number or the progress bar icon to open the build status page.
+5. Here you can monitor the progress and see the console output by clicking Console Output. This will show you real-time logs of the build process, including any tests run, Docker build steps, and deployment actions.
+
+### **IX. V. Viewing your application**
+
+1. If your Jenkins server and Flask app are deployed on the same network or machine, you can access your Flask application by navigating to `http://<jenkins-host-ip>:5000` in your web browser.
+2. If it’s running as a Docker container directly on the Jenkins host, and you've mapped the ports correctly as in the example, http://localhost:5000 should display your Flask app.
+
