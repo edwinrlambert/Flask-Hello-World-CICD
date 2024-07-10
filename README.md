@@ -689,6 +689,20 @@ pipeline {
         KUBECONFIG = 'C:\\Users\\user\\.kube\\config'
     }
     stages {
+        stage('Preparation') {
+            steps {
+                script {
+                    bat "python -m pip install -r requirements.txt"
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                script {
+                    bat "python -m unittest discover -s tests"
+                }
+            }
+        }
         stage('Build') {
             steps {
                 script {
@@ -716,7 +730,11 @@ pipeline {
 - `environment` defines the environment variables that are accessible throughout the pipeline.
   - `DOCKER_IMAGE` is the docker image name.
   - `KUBECONFIG` is the path to Kubernetes configuration file (`kubeconfig`)
-- `stages` consists of two stages: `Build` and `Deploy`.
+- `stages` consists of the following stages: `Preparation`, `Test`, `Build` and `Deploy`.
+  - `stage('Preparation')` declares a pipeline stage named "Preparation".
+    - `bat "python -m pip install -r requirements.txt"` is a batch command that runs updates pip (Python’s package installer) and then installs all the Python dependencies listed in the requirements.txt file.
+  - `stage('Test')` declares a new stage named "Test". 
+    - `bat "python -m unittest discover -s tests"` command runs the Python unittest module's discovery feature, which automatically identifies and runs tests. The -s tests option tells unittest to look for test files in the tests directory. 
   - `stage("Build")` defines a stage named "Build".
     - `bat "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."` uses the `bat` command to execute a batch script on the Windows machine. It builds a Docker image with a tag that includes the Docker image name and the Jenkins build number.
     - `bat "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"` pushes the docker image to the Docker Hub using the tag created in the previous step.
