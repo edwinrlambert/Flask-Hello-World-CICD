@@ -8,6 +8,13 @@ pipeline {
         KUBECONFIG = 'C:\\Users\\user\\.kube\\config'
     }
     stages {
+        stage('Test') {
+            steps {
+                script {
+                    bat "python -m unittest discover -s tests"
+                }
+            }
+        }
         stage('Build') {
             steps {
                 script {
