@@ -8,6 +8,13 @@ pipeline {
         KUBECONFIG = 'C:\\Users\\user\\.kube\\config'
     }
     stages {
+        stage('Preparation') {
+            steps {
+                script {
+                    bat "python -m pip install -r requirements.txt"
+                }
+            }
+        }
         stage('Test') {
             steps {
                 script {
