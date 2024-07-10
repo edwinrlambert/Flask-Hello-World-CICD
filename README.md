@@ -320,3 +320,97 @@ py run.py
 ```
 
 This will run the Flask application on your web browser at `localhost:5000`.
+
+## **V. Setting up Docker**
+
+Now we will use Docker to build, test, and deploy applications quickly.
+
+### **V. I. Setting up Docker Desktop**
+
+**Note**: I'm using WIndows (Yeah Yeah, I know. I hear you!)
+
+1. Go to Docker website and download [Docker Desktop](https://www.docker.com/products/docker-desktop/) depending on the platform you use.
+2. Double-click and run the Docker Desktop installer executable.
+3. Once the installation is complete, click "Close" and "Restart" your computer if prompted.
+4. After installation and reboot, launch Docker Desktop from the Start Menu.
+5. Docker Desktop will complete the initial setup. Follow any on-screen instructions to finalize the configuration.
+6. (Optional) Sign in to Docker Hub.
+
+```sh
+# Verify Installation
+docker --version
+```
+
+```sh
+# Run a test container.
+docker run hello-world
+```
+
+This command will download a test image and run it in a container. If successful, you'll see a `"Hello from Docker!"` message. 
+
+### **V. II. Creating a Dockerfile**
+
+A `Dockerfile` is a text file that contains collections of instructions and commands that will be automatically executed in sequence in the docker environment for building a new docker image.
+
+```
+Hello CICD
+└─ Dockerfile
+```
+
+```dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Intall any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
+
+# Defined environment variables
+ENV NAME World
+
+# RUN run.py when the container launches
+CMD [ "python", "run.py" ]
+```
+
+**Explanations**:
+- `FROM python:3.9-slim` specifies the base image for the Docker image. `python:3.9-slim` is an official Docker Image for Python 3.9 with a minimal footprint.
+- `WORKDIR /app` sets the working directory inside the container to `/app`. All subsequent instructions will be run in this directory.
+- `COPY . /app` copies all the contents of the current directory on the host machine into the `/app` directory in the container.
+- `RUN pip install --no-cache-dir -r requirements.txt` installs all the Python packages specified in the `requirements.txt` using `pip`. The `--no-cache-dir` option prevents `pip` from caching the package files, which reduces the image size.
+- `ENV NAME World` sets an environment variable `NAME` with the value `World` inside the container.
+- `CMD [ "python", "run.py" ]` specifies the command to run when the container starts.
+
+### **V. III. Build and Run the Docker Container**
+
+Now, we build and run the docker container and verify that the applications runs inside the container by accessing it via `localhost:5000`.
+
+```sh
+# Build the docker image.
+docker build -t hello-cicd .
+```
+
+**Explanations**:
+
+- `docker build` command is used to build a Docker image from a Dockerfile.
+- `-t hello-cicd` is used to tag the image with the name hello-cicd.
+- The dot `.` at th end of the command specifies the build context, which is the current directory. Docker will look for a `Dockerfile` in this directory and use it to build the image.
+
+```sh
+# Run the Docker Container
+docker run -p 5000:5000 hello-cicd
+```
+
+**Explanation**:
+
+- `docker run` is the command runs a Docker container from a specified Docker image.
+- `-p 5000:5000` is used to publish a container's port to the host. The format is `host_port:container_post`.
+
+Verify that the application runs by opening the web browser and navigate to `https://localhost:5000`.
