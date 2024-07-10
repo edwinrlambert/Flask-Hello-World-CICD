@@ -5,41 +5,42 @@
 This project is a hands-on learning experience I undertook to understand how DevOps works and to get familiar with some of the essential tools used in DevOps workflows.
 
 Here is the high-level process of this project:
+
 1. **Create a Flask Web Application:**
-    
-    Developed a small web application using Flask to understand the basics of web app development.
+
+   Developed a small web application using Flask to understand the basics of web app development.
 
 2. **Run the Flask Application:**
 
-    Ensured the Flask application was up and running smoothly on the local environment.
+   Ensured the Flask application was up and running smoothly on the local environment.
 
 3. **Docker Integration:**
 
-    Created a DockerFile to containerize the Flask application, then built and ran the project using Docker for consistent and isolated environments.
+   Created a DockerFile to containerize the Flask application, then built and ran the project using Docker for consistent and isolated environments.
 
 4. **CI/CD Pipeline with Jenkins:**
 
-    Set up Jenkins to create a CI/CD pipeline, automating the build, test, and deployment processes for the Flask application.
+   Set up Jenkins to create a CI/CD pipeline, automating the build, test, and deployment processes for the Flask application.
 
 5. **Infrastructure Management with Terraform:**
 
-    Utilized Terraform for efficient infrastructure provisioning, deployment, scaling, and monitoring. This allowed me to manage infrastructure as code.
+   Utilized Terraform for efficient infrastructure provisioning, deployment, scaling, and monitoring. This allowed me to manage infrastructure as code.
 
 6. **Container Orchestration with Kubernetes:**
 
-    Employed Kubernetes to automate the operational tasks of container management. This included deploying applications, rolling out updates, scaling as needed, and monitoring the application to maintain optimal performance.
+   Employed Kubernetes to automate the operational tasks of container management. This included deploying applications, rolling out updates, scaling as needed, and monitoring the application to maintain optimal performance.
 
 7. **Expose Services with Ngrok:**
 
-    Used Ngrok to expose the local development environment to the internet securely, facilitating external access for testing and demonstrations.
+   Used Ngrok to expose the local development environment to the internet securely, facilitating external access for testing and demonstrations.
 
 8. **Source Code Management with Git:**
 
-    Managed the source code using Git, keeping track of changes and maintaining version control throughout the project lifecycle.
+   Managed the source code using Git, keeping track of changes and maintaining version control throughout the project lifecycle.
 
 9. **Repository Hosting with GitHub:**
 
-    Stored, tracked, and version controlled the project on GitHub, utilizing its robust platform for collaborative development and project management.
+   Stored, tracked, and version controlled the project on GitHub, utilizing its robust platform for collaborative development and project management.
 
 10. **Automation with GitHub Webhooks:**
 
@@ -180,14 +181,14 @@ For creating a flask application, we create an `app` folder and inside we create
 ```
 # Flask Application Folder Structure
 Hello CICD
-├─ app 
-│   │   
-│   ├── static                          
+├─ app
+│   │
+│   ├── static
 │   │   ├── css
 │   │   │   └── style.css
 │   │   └── img
 │   │       └── ci-cd.png
-│   ├── templates                      
+│   ├── templates
 │   │   └── index.html
 │   ├── __init__.py
 │   └── views.py
@@ -228,10 +229,10 @@ We'll start with the `./app/templates/index.html` file. This is just going to be
 - `<!DOCTYPE html>` declares the document type and the version of HTML used (HTML5).
 - The `<html>` tags wraps the entire HTML document.
 - The `<head>` section contains the meta-information of the document.
-    - `{{ url_for('static', filename='css/style.css') }}` is a Jinja2 template syntax used in Flask to dynamically generate the URL for the CSS file located in the static folder.
+  - `{{ url_for('static', filename='css/style.css') }}` is a Jinja2 template syntax used in Flask to dynamically generate the URL for the CSS file located in the static folder.
 - The `<body>` section contains the content of the HTML document.
-    - `src="{{ url_for('static', filename='img/ci-cd.png') }}"` dynamically generates the URL for the image file located in the static folder using Jinja2 syntax.
-    - `alt="Sample Image for CI/CD pipeline"` provides alternative text for the image, which is useful for accessibility and if the image fails to load.
+  - `src="{{ url_for('static', filename='img/ci-cd.png') }}"` dynamically generates the URL for the image file located in the static folder using Jinja2 syntax.
+  - `alt="Sample Image for CI/CD pipeline"` provides alternative text for the image, which is useful for accessibility and if the image fails to load.
 
 **Note**: Create the `./static/css/style.css` to add stylesheet and design to the HTML file.
 
@@ -244,7 +245,7 @@ Since we're using the [Flask](https://pypi.org/project/Flask/) library. Let's in
 pip install Flask
 ```
 
-We then create the `views.py` file. 
+We then create the `views.py` file.
 
 ```py
 from flask import Blueprint, render_template
@@ -259,15 +260,15 @@ def home():
 **Explanations**:
 
 - Import the necessary libraries.
-    - `Blueprint` helps organize the application into modules, making it easier to manage large applications.
-    - `render_template` is used to render HTML templates.
+  - `Blueprint` helps organize the application into modules, making it easier to manage large applications.
+  - `render_template` is used to render HTML templates.
 - Using the `Blueprint()` method, we create a new Blueprint instance.
-    - `main` is the name of the blueprint.
-    - `__name__` is the name of the current module.
+  - `main` is the name of the blueprint.
+  - `__name__` is the name of the current module.
 - `@main.route("/")` is a route decorator that is associated with the path '/' with the home function.
 - The `home()` function handles request to the root URL and renders the index.html template.
 
-### **IV. IV. Creating the __init__.py file**
+### **IV. IV. Creating the **init**.py file**
 
 ```py
 from flask import Flask
@@ -282,7 +283,7 @@ def create_app():
 **Explanations**:
 
 - Import the necessary libraries.
-    - `Flask` module is necessary to create flask applications.
+  - `Flask` module is necessary to create flask applications.
 - `app = Flask(__name__)` creates an instance of the Flask application. `__name__` is passed to `Flask` constructor to determine the root path of the application, which it needs to location resources like static and template files.
 - `from .views import main` import the `main` blueprint from `views` module. The dot (`.`) indicates that `views` module is within the same package as the current module.
 - `app.register_blueprint(main)` registers the `main` blueprint with the Flask application instance.
@@ -306,9 +307,9 @@ if __name__ == '__main__':
 - `from app import create_app` imports the `create_app` function from the `app` module.
 - `app = create_app()` creates an instance of the Flask application and assigns it to app.
 - `app.run(host="0.0.0.0", port = 5000)` run the Flask application with the following settings:
-    - `host="0.0.0.0"` makes the server public available, listening on all available IP addresses. This is make sure that the application is accessible from other devices on the network.
-    - `port=5000` is the default port for Flask where the app will listen for incoming connections.
-    - `debug=True` was the previous command. Mentioned to make sure that the application enables debugging.
+  - `host="0.0.0.0"` makes the server public available, listening on all available IP addresses. This is make sure that the application is accessible from other devices on the network.
+  - `port=5000` is the default port for Flask where the app will listen for incoming connections.
+  - `debug=True` was the previous command. Mentioned to make sure that the application enables debugging.
 
 ### **IV. VI. Running the Flask application**
 
@@ -329,7 +330,7 @@ Ensure that your Flask application has a dedicated test directory. We'll use Pyt
 # Flask Test Folder Structure
 Hello CICD
 └─ tests
-    ├── __init__.py                          
+    ├── __init__.py
     └── test_views.py
 ```
 
@@ -339,24 +340,24 @@ from flask import url_for
 from app import create_app
 
 class FlaskTestCase(unittest.TestCase):
-    
+
     def setUp(self):
         # Set up test client before each test.
         self.app = create_app()
         self.app.testing = True
         self.client = self.app.test_client()
-        
+
     def test_home_status_code(self):
         # Test that the homepage is accessible.
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
-        
+
     def test_home_data(self):
         # Test the data returned by the home page.
         response = self.client.get('/')
         self.assertIn(b'Hello CI/CD!', response.data)
-        
-        
+
+
 if __name__ =="__main__":
     unittest.main()
 ```
@@ -364,17 +365,17 @@ if __name__ =="__main__":
 **Explanations**:
 
 - Import the necessary libraries.
-    - `unittest` is the Python's built-in module for creating and running tests.
-    - `create_app` creates and configures an instance of the Flask application.
+  - `unittest` is the Python's built-in module for creating and running tests.
+  - `create_app` creates and configures an instance of the Flask application.
 - We first create a test class that inherits from `unittest.Testcase`, providing a framework for writing tests.
-    - The `setUp` is a special method that is run before each test method. It is used to set up the state that is shared among the test methods.
-        - `self.app = create_app()`: Creates an instance of the Flask application using the create_app function.
-        - `self.app.testing = True`: Puts the Flask app in testing mode, which provides better error messages and ensures that exceptions propagate rather than being handled by the Flask error handlers.
-        - `self.client = self.app.test_client()`: Creates a test client that can be used to simulate HTTP requests to the Flask application. This client is used to interact with the application during testing.
-    - The `test_home_status_code` is a test method to verify that the home page is accessible.
-        - `self.assertEqual(response.status_code, 200)`: Asserts that the HTTP status code of the response is 200, indicating success.
-    - The `test_home_data` is a test method to verify the content of the home page.
-        - `self.assertIn(b'Hello CI/CD!', response.data)`: Asserts that the response data contains the byte string b'Hello CI/CD!'. This ensures that the expected content is present on the home page.
+  - The `setUp` is a special method that is run before each test method. It is used to set up the state that is shared among the test methods.
+    - `self.app = create_app()`: Creates an instance of the Flask application using the create_app function.
+    - `self.app.testing = True`: Puts the Flask app in testing mode, which provides better error messages and ensures that exceptions propagate rather than being handled by the Flask error handlers.
+    - `self.client = self.app.test_client()`: Creates a test client that can be used to simulate HTTP requests to the Flask application. This client is used to interact with the application during testing.
+  - The `test_home_status_code` is a test method to verify that the home page is accessible.
+    - `self.assertEqual(response.status_code, 200)`: Asserts that the HTTP status code of the response is 200, indicating success.
+  - The `test_home_data` is a test method to verify the content of the home page.
+    - `self.assertIn(b'Hello CI/CD!', response.data)`: Asserts that the response data contains the byte string b'Hello CI/CD!'. This ensures that the expected content is present on the home page.
 
 ## **VI. Setting up Docker**
 
@@ -401,7 +402,7 @@ docker --version
 docker run hello-world
 ```
 
-This command will download a test image and run it in a container. If successful, you'll see a `"Hello from Docker!"` message. 
+This command will download a test image and run it in a container. If successful, you'll see a `"Hello from Docker!"` message.
 
 ### **VI. II. Creating a Dockerfile**
 
@@ -437,6 +438,7 @@ CMD [ "python", "run.py" ]
 ```
 
 **Explanations**:
+
 - `FROM python:3.9-slim` specifies the base image for the Docker image. `python:3.9-slim` is an official Docker Image for Python 3.9 with a minimal footprint.
 - `WORKDIR /app` sets the working directory inside the container to `/app`. All subsequent instructions will be run in this directory.
 - `COPY . /app` copies all the contents of the current directory on the host machine into the `/app` directory in the container.
@@ -483,15 +485,15 @@ Verify that the application runs by opening the web browser and navigate to `htt
 
 1. Navigate to your project directory and create a subdirectory named terraform.
 2. Inside this directory, create the following files:
-    - `main.tf`: Main configuration file where you will define the provider and resources.
-    - `variables.tf`: File to declare variables.
-    - `outputs.tf`: File to declare outputs.
+   - `main.tf`: Main configuration file where you will define the provider and resources.
+   - `variables.tf`: File to declare variables.
+   - `outputs.tf`: File to declare outputs.
 
 ```
 # Terraform Folder Structure
 Hello CICD
 └─ terraform
-    ├── main.tf                     
+    ├── main.tf
     ├── outputs.tf
     └── variable.tf
 ```
@@ -517,17 +519,18 @@ resource "kubernetes_namespace" "hello-cicd" {
     }
 }
 ```
+
 **Explanations**:
 
 - `terraform` is the block is used to specify settings related to Terraform itself, including provider requirements.
-    - `required_providers`: This block specifies the providers that are required for this configuration.
-        - `kubernetes` is the name of the provider.
-            - `source = "hashicorp/kubernetes"`: This specifies the source of the provider, indicating that the Kubernetes provider plugin should be downloaded from the HashiCorp repository.
+  - `required_providers`: This block specifies the providers that are required for this configuration.
+    - `kubernetes` is the name of the provider.
+      - `source = "hashicorp/kubernetes"`: This specifies the source of the provider, indicating that the Kubernetes provider plugin should be downloaded from the HashiCorp repository.
 - `provider "kubernetes"` block configures the Kubernetes provider.
-    - `config_path = "~/.kube/config"`: This specifies the path to the Kubernetes configuration file (kubeconfig). 
+  - `config_path = "~/.kube/config"`: This specifies the path to the Kubernetes configuration file (kubeconfig).
 - `resource "kubernetes_namespace" "hello-cicd"`: This block defines a resource of type kubernetes_namespace with the identifier hello-cicd.
-    - `metadata` block specifies metadata for the Kubernetes namespace.
-        - `name = "hello-cicd-namespace"`: This sets the name of the namespace to hello-cicd-namespace.
+  - `metadata` block specifies metadata for the Kubernetes namespace.
+    - `name = "hello-cicd-namespace"`: This sets the name of the namespace to hello-cicd-namespace.
 
 **outputs.tf** file
 
@@ -539,8 +542,8 @@ output "namespace" {
 
 **Explanations**:
 
-- `output "namespace"`: This declares an output block named namespace. Outputs are used to make information about your infrastructure available after the configuration has been applied. 
-    - `value`: This specifies the value that the output will contain. In this case, the value is being set to kubernetes_namespace.hello-cicd.metadata[0].name.
+- `output "namespace"`: This declares an output block named namespace. Outputs are used to make information about your infrastructure available after the configuration has been applied.
+  - `value`: This specifies the value that the output will contain. In this case, the value is being set to kubernetes_namespace.hello-cicd.metadata[0].name.
 
 ### **VII. III. Initialize and apply Terraform Configurations**
 
@@ -598,19 +601,20 @@ spec:
 ```
 
 **Explanations**:
+
 - `apiVersion: apps/v1` specifies the API version for the Kubernetes Deployment object. `apps/v1` is the stable API version for managing deployments.
 - `kind: Deployment` indicates that the resource being defined is a Deployment. A Deployment ensures that a specified number of pod replicas are running at any given time.
 - `metadata` provides metadata about the deployment.
 - `spec` describes the desired state of the Deployment.
-    - `replicas: 3` specifies that three replicas (pods) of the application should be running.
-    - `selector` defines how to identify the pods managed by this Deployment.
-        - `matchLabels` specifies that pods with the label app: hello-cicd are selected.
-    - `template` describes the pod that will be created by the Deployment.
-        - `containers` specifies the containers that will run in the pods.
-            - `name: hello-cicd` is the name of the container.
-            - `image: {username}/hello-cicd:latest` is the Docker image to use for the container. 
-            - `ports` specifies the ports that the container will expose.
-                - `containerPort: 5000` mentions that the container will listen on port 5000.
+  - `replicas: 3` specifies that three replicas (pods) of the application should be running.
+  - `selector` defines how to identify the pods managed by this Deployment.
+    - `matchLabels` specifies that pods with the label app: hello-cicd are selected.
+  - `template` describes the pod that will be created by the Deployment.
+    - `containers` specifies the containers that will run in the pods.
+      - `name: hello-cicd` is the name of the container.
+      - `image: {username}/hello-cicd:latest` is the Docker image to use for the container.
+      - `ports` specifies the ports that the container will expose.
+        - `containerPort: 5000` mentions that the container will listen on port 5000.
 
 **service.yaml** file
 
@@ -628,19 +632,18 @@ spec:
       protocol: TCP
   selector:
     app: hello-cicd
-
 ```
 
 **Explanations**:
 
 - `kind: Service` indicates that the resource being defined is a Service. A Service is an abstraction that defines a logical set of pods and a policy to access them.
 - `spec` describes the desired state of the Service.
-    - `type: LoadBalancer` specifies that the Service should be of type LoadBalancer, which exposes the Service externally using a cloud provider’s load balancer.
-    - `ports` defines the ports that the Service will expose.
-        - `port: 5000` si the port on which the Service will be exposed.
-        - `targetPort: 5000` is the port on the container that the traffic will be forwarded to.
-        - `protocol: TCP` is the protocol used by the Service. In this case, it’s TCP.
-    - `selector` defines how the Service will identify the pods it routes traffic to.
+  - `type: LoadBalancer` specifies that the Service should be of type LoadBalancer, which exposes the Service externally using a cloud provider’s load balancer.
+  - `ports` defines the ports that the Service will expose.
+    - `port: 5000` si the port on which the Service will be exposed.
+    - `targetPort: 5000` is the port on the container that the traffic will be forwarded to.
+    - `protocol: TCP` is the protocol used by the Service. In this case, it’s TCP.
+  - `selector` defines how the Service will identify the pods it routes traffic to.
 
 ### **VIII. III. Deploy and Access the Application**
 
@@ -657,23 +660,23 @@ First, you need to have Jenkins installed on your server or local machine.
 1. Download [Jenkins](https://www.jenkins.io/download/) for your platform.
 2. Install Jenkins based on the instructions specific to the OS.
 3. After installation, navigate to `https://localhost:8080`.
-4. Follow the on-screen installation to complete the setup, which includes unlocking Jenkins using the initial admin password found in the installation logs or file.   
+4. Follow the on-screen installation to complete the setup, which includes unlocking Jenkins using the initial admin password found in the installation logs or file.
 
 ### **IX. II. Configure Jenkins for the Project**
 
 After installation, we need to set up the project in Jenkins.
 
 1. Create a New Job:
-    - On the Jenkin's dashboard, click New Item.
-    - Enter the name for the job. For Example, `hello-cicd`.
-    - Select `Pipeline` and click OK.
+   - On the Jenkin's dashboard, click New Item.
+   - Enter the name for the job. For Example, `hello-cicd`.
+   - Select `Pipeline` and click OK.
 2. Configure Source Code Management:
-    - In the job configurations, scroll to the "`pipeline`" section.
-    - You can choose either "`Pipeline script`" to write the Jenkinsfile script directly in the UI, or "`Pipeline script from SCM`" to load it from your source control. `Git` in my case.
+   - In the job configurations, scroll to the "`pipeline`" section.
+   - You can choose either "`Pipeline script`" to write the Jenkinsfile script directly in the UI, or "`Pipeline script from SCM`" to load it from your source control. `Git` in my case.
 
 ### **IX. III. Creating a Jenkinsfile**
 
-A `Jenkinsfile` defines the steps that Jenkins should follow as part of the CI pipeline. 
+A `Jenkinsfile` defines the steps that Jenkins should follow as part of the CI pipeline.
 
 ```groovy
 pipeline {
@@ -711,14 +714,14 @@ pipeline {
 - `pipeline` declares the beginning of the Jenkins pipeline.
 - `agent any` specifies that the pipeline can run on any available Jenkins agent.
 - `environment` defines the environment variables that are accessible throughout the pipeline.
-    - `DOCKER_IMAGE` is the docker image name.
-    - `KUBECONFIG` is the path to Kubernetes configuration file (`kubeconfig`)
+  - `DOCKER_IMAGE` is the docker image name.
+  - `KUBECONFIG` is the path to Kubernetes configuration file (`kubeconfig`)
 - `stages` consists of two stages: `Build` and `Deploy`.
-    - `stage("Build")` defines a stage named "Build".
-        - `bat "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."` uses the `bat` command to execute a batch script on the Windows machine. It builds a Docker image with a tag that includes the Docker image name and the Jenkins build number.
-        - `bat "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"` pushes the docker image to the Docker Hub using the tag created in the previous step.
-    - `stage("Deploy")` defines a stage named "Deploy".
-        - `bat "kubectl set image deployment/hello-cicd hello-cicd=${DOCKER_IMAGE}:${BUILD_NUMBER} -n hello-cicd-namespace"` uses the `bat` command to execute a batch script to update the Kubernetes deployment named `hello-cicd` in the `hello-cicd-namespace` to use the new Docker image tagged with the current build number.
+  - `stage("Build")` defines a stage named "Build".
+    - `bat "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."` uses the `bat` command to execute a batch script on the Windows machine. It builds a Docker image with a tag that includes the Docker image name and the Jenkins build number.
+    - `bat "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"` pushes the docker image to the Docker Hub using the tag created in the previous step.
+  - `stage("Deploy")` defines a stage named "Deploy".
+    - `bat "kubectl set image deployment/hello-cicd hello-cicd=${DOCKER_IMAGE}:${BUILD_NUMBER} -n hello-cicd-namespace"` uses the `bat` command to execute a batch script to update the Kubernetes deployment named `hello-cicd` in the `hello-cicd-namespace` to use the new Docker image tagged with the current build number.
 
 ### **IX. IV. Build the Pipeline**
 
@@ -735,3 +738,66 @@ Configure the Jenkins pipeline to pull the code from the GitHub repository, buil
 1. If your Jenkins server and Flask app are deployed on the same network or machine, you can access your Flask application by navigating to `http://<jenkins-host-ip>:5000` in your web browser.
 2. If it’s running as a Docker container directly on the Jenkins host, and you've mapped the ports correctly as in the example, http://localhost:5000 should display your Flask app.
 
+## **X. Expose Local Development Environment with Ngrok**
+
+If your Jenkins server is hosted locally and you want to expose it to the internet to handle incoming webhooks from services like GitHub, GitLab, or Bitbucket, you can use ngrok. Ngrok is a tool that creates a secure tunnel to your localhost, providing an externally accessible URL that forwards to your local development environment.
+
+### **X. I. Download and install ngrok**
+
+1. Go to the [ngrok](https://ngrok.com/download) website and download the version appropriate for your operating system.
+2. Extract the downloaded file. This will give you the ngrok executable.
+3. To use ngrok, you need to sign up for an account. Once signed up, log in to your dashboard on the ngrok website.
+4. In your ngrok dashboard, you will find your `auth token`. This token is used to authenticate with ngrok's servers.
+5. Open terminal/command prompt and navigate to the directory where you extracted ngrok.
+6. Connect your account using the auth token.
+   ```sh
+   ./ngrok authtoken <YOUR_AUTH_TOKEN>
+   ```
+
+### **X. II. Start ngrok Tunnel**
+
+You need to know on which port your Jenkins server is running. By default, Jenkins typically runs on port 8080.
+
+In the terminal, change to where ngrock executable is kept and run the following command to start an ngrok tunnel to the Jenkins port:
+
+```sh
+./ngrok http 8080
+```
+
+This command tells ngrok to forward HTTP traffic from the ngrok URL to port 8080 on your localhost.
+
+Once ngrok is running, it will display an URL in the terminal that looks something like `http://<random-id>.ngrok-free.ap`. This URL is publicly accessible and routes to your local Jenkins server.
+
+**Note**: Your ngrok tunnel must be kept running as long as you need external access to your local Jenkins. If ngrok stops, the URL will no longer function.
+
+## **XI. Automate Actions with GitHub Webhooks**
+
+Configure webhooks to automate actions such as triggering Jenkins jobs or updating the deployment status.
+
+Use the ngrok URL in your webhook configuration for GitHub, GitLab, or Bitbucket. Append any specific endpoint required by the plugin you are using (like /github-webhook/ for GitHub).
+
+```sh
+http://<random-id>.ngrok.io/github-webhook/
+```
+
+### **XI. I. GitHub Setup**
+
+1. Go to your repository on GitHub.
+2. Click on `Settings` > `Webhooks` > `Add webhook`.
+   - Payload URL: Enter the Jenkins URL followed by /github-webhook/. For example: `http://<random-id>.ngrok.io/github-webhook/`.
+   - Content type: Select `application/json`.
+   - Which events would you like to trigger this webhook?: Choose "`Just the push event.`"
+   - Ensure the `Active` box is checked to enable the webhook.
+3. Click Add webhook.
+
+### **XI. II. Jenkins Setup**
+
+1. Ensure that the "GitHub plugin" is installed in Jenkins. You can check this under `Manage Jenkins` > `Manage Plugins` > `Available/Installed`.
+2. In Jenkins, go to `Manage Jenkins` > `Configure System`.
+3. Under the GitHub section, ensure your GitHub credentials are set up and add a new GitHub Server if necessary.
+4. Go to your job configuration page by clicking on the job and then clicking "`Configure`".
+5. Under "`Build Triggers`", check "`GitHub hook trigger for GITScm polling`".
+
+## **XII. Test the Full Workflow**
+
+Test the entire CI/CD pipeline from code commit to deployment.
